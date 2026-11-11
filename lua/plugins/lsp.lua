@@ -163,9 +163,12 @@ return {
 	},
 	{
 		"mrcjkb/rustaceanvim",
-		ft = "rust",
-		-- rustaceanvim manages rust-analyzer itself, do NOT use mason for it
-		-- See: https://github.com/mrcjkb/rustaceanvim#important
+		-- To avoid being surprised by breaking changes,
+		-- I recommend you set a version range
+		version = "^9",
+		-- This plugin implements proper lazy-loading (see :h lua-plugin-lazy).
+		-- No need for lazy.nvim to lazy-load it.
+		lazy = false,
 	},
 	{
 		"mason-org/mason.nvim",

@@ -32,7 +32,7 @@ local WEB_FORMATTERS = {
 }
 
 -- HTML / Markdown / YAML / TOML
-local GENERAL_FORMATTERS = {
+local MARKUP_CONFIG_FORMATTERS = {
 	"oxfmt",
 	"prettierd",
 	"prettier",
@@ -53,8 +53,8 @@ local FORMAT_ON_SAVE_CONFIG = {
 ---@return table|nil
 local function format_on_save(bufnr)
 	if
-		vim.g.disabled_auto_format
-		or vim.b[bufnr].disabled_auto_format
+		vim.g.disable_autoformat
+		or vim.b[bufnr].disable_autoformat
 		or DISABLED_AUTO_FORMAT_FILETYPES[bo[bufnr].filetype]
 		or api.nvim_buf_line_count(bufnr) > MAX_FORMAT_LINE_COUNT
 	then
@@ -72,8 +72,8 @@ local FORMAT_AFTER_SAVE_CONFIG = {
 ---@return table|nil
 local function format_after_save(bufnr)
 	if
-		vim.g.disabled_auto_format
-		or vim.b[bufnr].disabled_auto_format
+		vim.g.disable_autoformat
+		or vim.b[bufnr].disable_autoformat
 		or DISABLED_AUTO_FORMAT_FILETYPES[bo[bufnr].filetype]
 		or not ENABLED_FORMAT_AFTER_SAVE_FILETYPES[bo[bufnr].filetype]
 	then
@@ -89,9 +89,9 @@ end
 api.nvim_create_user_command("ConformToggleAutoFormat", function(args)
 	if args.bang then
 		-- ConformToggleAutoFormat! will disable formatting just for this buffer
-		vim.b.disabled_auto_format = not vim.b.disabled_auto_format
+		vim.b.disable_autoformat = not vim.b.disable_autoformat
 	else
-		vim.g.disabled_auto_format = not vim.g.disabled_auto_format
+		vim.g.disable_autoformat = not vim.g.disable_autoformat
 	end
 end, {
 	desc = "Conform toggle auto format",
@@ -175,10 +175,10 @@ return {
 				scss = WEB_FORMATTERS,
 
 				-- HTML / Documentation / Configuration
-				html = GENERAL_FORMATTERS,
-				markdown = GENERAL_FORMATTERS,
-				yaml = GENERAL_FORMATTERS,
-				toml = GENERAL_FORMATTERS,
+				html = MARKUP_CONFIG_FORMATTERS,
+				markdown = MARKUP_CONFIG_FORMATTERS,
+				yaml = MARKUP_CONFIG_FORMATTERS,
+				toml = MARKUP_CONFIG_FORMATTERS,
 
 				-- C / C++
 				c = { "clang_format" },
