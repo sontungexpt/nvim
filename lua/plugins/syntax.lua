@@ -1,8 +1,8 @@
 local vim = vim
 
 -- ---------------------------------------------------- Syntax ----------------------------------------------------
--- Syntax highlighting and parsing plugins.
--- Mission: Tree-sitter syntax highlighting, indentation, autotag, and markdown/plantuml rendering.
+-- Tree-sitter syntax highlighting, indentation, folds, and markdown rendering.
+
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
@@ -10,95 +10,67 @@ return {
 			"HiPhish/rainbow-delimiters.nvim",
 			"nvim-tree/nvim-web-devicons",
 		},
+		build = ":TSUpdate",
 		event = "User FileLazyLoaded",
-		cmd = { "TSInstall", "TSInstallFromGrammar", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
+		cmd = { "TSUpdate", "TSInstall", "TSInstallFromGrammar", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
 		opts = {
-			-- single list of tree-sitter languages ensured to be installed
-			-- covers all file types found in ~/stilux-dotfiles/.config plus common dev languages
-			ensured_install = {
+			-- Single list of tree-sitter languages ensured to be installed
+			-- This should use for some parser that can not detect by filetype
+			ensure_installed = {
 				-- Core / Neovim
 				"lua",
 				"luadoc",
 				"vim",
 				"vimdoc",
-
-				-- Web / frontend
-				"javascript",
-				"typescript",
-				"tsx",
-				"jsx",
-				"html",
-				"css",
-				"scss",
-				"svelte",
-				"vue",
-				"json",
-				"jsonc",
-
-				-- Config / markup (dotfiles heavy)
-				"toml",
-				"yaml",
-				"ini",
-				"markdown",
-				"markdown_inline",
-				"xml",
-				"editorconfig",
-				"gitignore",
-				"dockerfile",
-				"cmake",
-				"make",
-				"kdl",
-
-				-- System / backend
-				"c",
-				"cpp",
-				"rust",
-				"go",
-				"zig",
-				"dart",
-				"python",
-				"bash",
-				"zsh",
-				"sh",
-				"java",
-				"kotlin",
-				"c_sharp",
-				"ruby",
-				"php",
-				"swift",
-				"scala",
-				"clojure",
-				"elixir",
-				"erlang",
-				"haskell",
-				"ocaml",
-				"fsharp",
-				"perl",
-				"r",
-				"matlab",
-				"julia",
-
-				-- Misc / query
-				"comment",
 				"diff",
 				"regex",
-				"sql",
-				"graphql",
-				"http",
-				"protobuf",
-				"latex",
-				"nix",
+				"printf",
+				"query",
+				"markdown",
+				"markdown_inline",
 			},
 		},
 		config = function(_, opts)
 			local TS = require("nvim-treesitter")
-			local parsers = require("nvim-treesitter.parsers")
 
 			-- setup treesitter once
 			TS.setup(opts)
 
+			-- ------------------------------------------------------------------
+			-- Ensure tree-sitter CLI is available before any parser install.
+			-- If missing (e.g. user deleted it), try to install via mason.
+			-- ------------------------------------------------------------------
+			local function ensure_ts_cli(cb)
+				if vim.fn.executable("tree-sitter") == 1 then return cb(true) end
+
+				local notify = require("utils.notify")
+				local ok, mason = pcall(require, "mason-registry")
+				if not ok then
+					notify.warn("mason.nvim is required to auto-install tree-sitter-cli")
+					return cb(false)
+				end
+
+				mason.refresh(function()
+					local pkg = mason.get_package("tree-sitter-cli")
+					if pkg:is_installed() then return cb(true) end
+					notify.info("Installing tree-sitter-cli via mason...")
+					pkg:install(
+						nil,
+						vim.schedule_wrap(function(success)
+							if success then
+								notify.info("tree-sitter-cli installed.")
+								cb(true)
+							else
+								notify.warn("Failed to install tree-sitter-cli via mason.")
+								cb(false)
+							end
+						end)
+					)
+				end)
+			end
+
 			-- install list is the single ensured_install table
-			local ensured_install = opts.ensured_install or {}
+			local ensure_installed = opts.ensure_installed or {}
 
 			-- compute installed parser set once (single filesystem scan)
 			local installed = {}
@@ -106,19 +78,35 @@ return {
 				installed[lang] = true
 			end
 
-			-- install any parsers from ensured_install that are missing on startup
-			-- (batched into a single async TS.install call)
-			local missing = {}
-			for _, lang in ipairs(ensured_install) do
-				if not installed[lang] then missing[#missing + 1] = lang end
-			end
-			if #missing > 0 then
-				TS.install(missing, { summary = true })
-				for _, lang in ipairs(missing) do
-					installed[lang] = true
+			-- ------------------------------------------------------------------
+			-- Install missing parsers; only mark installed after async :await succeeds.
+			-- ------------------------------------------------------------------
+			local function install_missing(langs, summary)
+				local todo = {}
+				for _, lang in ipairs(langs) do
+					if not installed[lang] then todo[#todo + 1] = lang end
 				end
+				if #todo == 0 then return end
+
+				local notify = require("utils.notify")
+				ensure_ts_cli(function(ok)
+					if not ok then
+						notify.warn("Skipping parser install: tree-sitter-cli is unavailable")
+						return
+					end
+					TS.install(todo, { summary = summary or true }):await(function()
+						for _, lang in ipairs(todo) do
+							installed[lang] = true
+						end
+						notify.info("Tree-sitter parsers installed: " .. table.concat(todo, ", "))
+					end)
+				end)
 			end
 
+			-- install any parsers from ensure_installed that are missing on startup
+			install_missing(ensure_installed, true)
+
+			local parsers = require("nvim-treesitter.parsers")
 			-- cache filetype -> language mapping to avoid repeated get_lang calls
 			local lang_cache = {}
 
@@ -126,7 +114,7 @@ return {
 			-- parser is not yet installed, and enable highlighting/indentation
 			-- (on-demand, mirrors LazyVim behavior)
 			vim.api.nvim_create_autocmd("FileType", {
-				group = vim.api.nvim_create_augroup("treesitter_auto_install", { clear = true }),
+				group = vim.api.nvim_create_augroup("__treesitter_auto_install__", { clear = true }),
 				callback = function(ev)
 					local ft = ev.match
 					local lang = lang_cache[ft]
@@ -134,20 +122,35 @@ return {
 						lang = vim.treesitter.language.get_lang(ft)
 						lang_cache[ft] = lang
 					end
-					if not lang then return end
+
 					-- skip languages that have no tree-sitter parser (e.g. snacks_notif)
-					if not parsers[lang] then return end
-					-- install the parser on first use if it is not yet installed
-					if not installed[lang] then
-						TS.install(lang, {})
-						installed[lang] = true -- optimistic mark to avoid re-triggering
+					if not lang or not parsers[lang] then return end
+
+					-- install the parser on first use if it is not yet installed.
+					-- We do NOT optimistically mark it installed; the :await callback
+					-- below marks it only after the install actually succeeds.
+					local start_treesitter = function()
+						if not vim.treesitter.highlighter.active[ev.buf] then vim.treesitter.start(ev.buf) end
+						if vim.bo[ev.buf].indentexpr == "" then vim.bo[ev.buf].indentexpr = "v:lua.vim.treesitter.indentexpr()" end
 					end
 
-					-- enable syntax highlighting for the buffer (pass explicit buffer to avoid
-					-- targeting buffer 0 where language cannot be determined)
-					if not vim.treesitter.highlighter.active[ev.buf] then vim.treesitter.start(ev.buf) end
-					-- enable indentation via treesitter (only set once per buffer)
-					vim.bo[ev.buf].indentexpr = "v:lua.vim.treesitter.indentexpr()"
+					if installed[lang] then
+						-- parser already installed, start highlighting immediately
+						start_treesitter()
+						return
+					end
+					local notify = require("utils.notify")
+					ensure_ts_cli(function(ok)
+						if not ok then
+							notify.warn("Skipping parser install for " .. ft .. ": tree-sitter-cli unavailable")
+							return
+						end
+						TS.install(lang, { summary = true }):await(function()
+							installed[lang] = true
+							notify.info("Tree-sitter parser installed for " .. ft .. " (" .. lang .. ")")
+							start_treesitter()
+						end)
+					end)
 				end,
 			})
 		end,
@@ -177,25 +180,25 @@ return {
 		},
 	},
 
-	-- 	-- Support for PlantUML (Comments for now only never remove this becasue we can reuse them)
-	-- 	{
-	-- 		"aklt/plantuml-syntax",
-	-- 		ft = "plantuml",
-	-- 	},
-	-- 	{
-	-- 		"https://gitlab.com/itaranto/plantuml.nvim",
-	-- 		ft = "plantuml",
-	-- 		cmd = "PlantUml",
-	-- 		opts = {
-	-- 			renderer = {
-	-- 				type = "image",
-	-- 				options = {
-	-- 					prog = "feh",
-	-- 					dark_mode = true,
-	-- 				},
+	-- Support for PlantUML (Comments for now only never remove this because we can reuse them)
+	-- {
+	-- 	"aklt/plantuml-syntax",
+	-- 	ft = "plantuml",
+	-- },
+	-- {
+	-- 	"https://gitlab.com/itaranto/plantuml.nvim",
+	-- 	ft = "plantuml",
+	-- 	cmd = "PlantUml",
+	-- 	opts = {
+	-- 		renderer = {
+	-- 			type = "image",
+	-- 			options = {
+	-- 				prog = "feh",
+	-- 				dark_mode = true,
 	-- 			},
-	-- 			render_on_write = true,
 	-- 		},
-	-- 		main = "plantuml",
+	-- 		render_on_write = true,
 	-- 	},
+	-- 	main = "plantuml",
+	-- },
 }

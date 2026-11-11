@@ -226,9 +226,11 @@ local env = _G.__jdtls_env
 -- Workspace: stable path derived from root_dir (no process spawn)
 -- ============================================================
 local function hash_path(p)
-    local h = 0
+    local bit = bit or require("bit")
+    local h = 2166136261  -- FNV offset basis (32-bit)
     for i = 1, #p do
-        h = (h * 31 + p:byte(i)) % 0xFFFFFFFF
+        h = bit.bxor(h, p:byte(i))       -- XOR với byte
+        h = bit.band(h * 16777619, 0xFFFFFFFF)  -- nhân với FNV prime, giữ trong 32-bit
     end
     return ("%08x"):format(h)
 end
@@ -301,9 +303,8 @@ local config = {
                     require("jdtls.dap").setup_dap_main_class_configs()
                 end)
                 if not ok2 then
-                    vim.notify(
-                        "jdtls: setup_dap_main_class_configs failed: " .. tostring(err),
-                        vim.log.levels.WARN
+                    require("utils.notify").warn(
+                        "jdtls: setup_dap_main_class_configs failed: " .. tostring(err)
                     )
                 end
             end, 4000)

@@ -63,4 +63,11 @@ return {
 			},
 		},
 	},
+
+	-- Smart window resizing: resize windows with arrow keys
+	{
+		-- dir = "/home/stilux/Data/workspace/neovim-plugins/smart-resizing",
+		"sontungexpt/smart-resizing",
+		opts = {},
+	},
 }
