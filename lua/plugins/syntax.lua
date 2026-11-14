@@ -136,7 +136,7 @@ return {
 
 					if installed[lang] then
 						-- parser already installed, start highlighting immediately
-						start_treesitter()
+						if not pcall(start_treesitter) then installed[lang] = nil end
 						return
 					end
 					local notify = require("utils.notify")
@@ -163,21 +163,7 @@ return {
 			"nvim-treesitter/nvim-treesitter",
 			"nvim-tree/nvim-web-devicons",
 		},
-		opts = {
-			code = {
-				sign = false,
-				width = "block",
-				right_pad = 1,
-			},
-			heading = {
-				sign = false,
-				icons = {},
-			},
-			paragraph = {
-				sign = false,
-				padding = false,
-			},
-		},
+		opts = {},
 	},
 
 	-- Support for PlantUML (Comments for now only never remove this because we can reuse them)
