@@ -139,7 +139,6 @@ return {
 									"node_modules",
 									"dist",
 									"build",
-									vim.fn.stdpath("config") .. "/refs",
 								},
 								--- Comment this if you use lazydev.nvim
 								-- library = {
