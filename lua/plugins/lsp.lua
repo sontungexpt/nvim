@@ -38,9 +38,10 @@ return {
 				-- go
 				{ name = "gopls" },
 
-				-- -- bash
+				-- bash | sh
 				-- { name = "bashls" },
 
+				-- zsh | sh | bash
 				{ name = "shuck" },
 
 				-- cpp
@@ -200,7 +201,7 @@ return {
 		opts = {
 			ensure_installed = { "stylua", "shfmt" },
 			ui = {
-				border = "single",
+				-- border = "single",
 				icons = {
 					package_pending = " ",
 					package_installed = " ",
@@ -210,14 +211,12 @@ return {
 		},
 		config = function(_, opts)
 			require("mason").setup(opts)
-			local mr = require("mason-registry")
-			mr:on("package:install:success", function()
+			require("mason-registry"):on("package:install:success", function()
 				vim.defer_fn(
 					function()
-						require("lazy.core.handler.event").trigger {
-							event = "FileType",
+						vim.api.nvim_exec_autocmds("FileType", {
 							buf = vim.api.nvim_get_current_buf(),
-						}
+						})
 					end,
 					100
 				)

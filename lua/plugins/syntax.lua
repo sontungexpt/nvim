@@ -135,10 +135,14 @@ return {
 					end
 
 					if installed[lang] then
-						-- parser already installed, start highlighting immediately
-						if not pcall(start_treesitter) then installed[lang] = nil end
-						return
+						-- Parser may have been removed or become unavailable despite the cached state.
+						local ok = pcall(start_treesitter)
+						if ok then return end
+
+						-- The cache may be stale so contineu try install for current filetype
+						installed[lang] = nil
 					end
+
 					local notify = require("utils.notify")
 					ensure_ts_cli(function(ok)
 						if not ok then

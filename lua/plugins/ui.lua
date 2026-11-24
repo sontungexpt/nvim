@@ -5,8 +5,7 @@ return {
 	-- Keymap hint layer
 	{
 		"folke/which-key.nvim",
-		keys = { "<leader>", "[", "]", '"', "'", "c", "v", "g", "d", "z" },
-		main = "which-key",
+		event = "VeryLazy",
 		opts = {
 			win = {
 				border = "single",
