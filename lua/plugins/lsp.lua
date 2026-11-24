@@ -21,7 +21,7 @@ return {
 	{
 		"neovim/nvim-lspconfig",
 		cmd = { "LspInfo" },
-		event = { "BufReadPre", "BufNewFile" },
+		event = "User FirstFileReady",
 		opts = {
 			servers = {
 				-- Official JetBrains Kotlin LSP (currently Alpha).
