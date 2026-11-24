@@ -37,14 +37,17 @@ return {
 		opts = {},
 	},
 
+	{
+		"HiPhish/rainbow-delimiters.nvim",
+		event = "User FirstFileReady",
+		opts = {},
+	},
+
 	-- Auto indent
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		event = "User FirstFileReady",
 		main = "ibl",
-		dependencies = {
-			"HiPhish/rainbow-delimiters.nvim",
-		},
 		opts = {
 			indent = {
 				char = "│",
