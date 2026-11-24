@@ -45,21 +45,22 @@ return {
 		dependencies = {
 			"HiPhish/rainbow-delimiters.nvim",
 		},
-		opts = function()
+		opts = {
+			indent = {
+				char = "│",
+			},
+			scope = {
+				char = "│",
+				show_start = false,
+			},
+			exclude = {
+				filetypes = { "alpha", "dashboard", "Trouble", "lazy", "NvimTree", "mason" },
+			},
+		},
+		config = function(_, opts)
 			local hooks = require("ibl.hooks")
 			hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
-			return {
-				indent = {
-					char = "│",
-				},
-				scope = {
-					char = "│",
-					show_start = false,
-				},
-				exclude = {
-					filetypes = { "alpha", "dashboard", "Trouble", "lazy", "NvimTree", "mason" },
-				},
-			}
+			require("ibl").setup(opts)
 		end,
 	},
 
@@ -77,6 +78,7 @@ return {
 		lazy = false,
 		opts = {},
 	},
+
 	-- Color hex highlighting: shows background color for color codes (#RRGGBB, rgb(), etc.)
 	-- {
 	-- 	dir = "/home/stilux/Data/workspace/neovim-plugins/nvim-highlight-colors",

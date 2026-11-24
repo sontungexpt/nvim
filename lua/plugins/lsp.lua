@@ -218,7 +218,7 @@ return {
 							buf = vim.api.nvim_get_current_buf(),
 						})
 					end,
-					100
+					80
 				)
 			end)
 		end,
