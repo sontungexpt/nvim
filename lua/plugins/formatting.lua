@@ -84,52 +84,46 @@ local function format_after_save(bufnr)
 end
 
 -- ============================================================================
--- ConformFormat user command
--- ============================================================================
-api.nvim_create_user_command("ConformToggleAutoFormat", function(args)
-	if args.bang then
-		-- ConformToggleAutoFormat! will disable formatting just for this buffer
-		vim.b.disable_autoformat = not vim.b.disable_autoformat
-	else
-		vim.g.disable_autoformat = not vim.g.disable_autoformat
-	end
-end, {
-	desc = "Conform toggle auto format",
-	bang = true,
-})
-
-api.nvim_create_user_command("ConformFormat", function(args)
-	local range
-
-	if args.count ~= -1 then
-		local end_line = api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1] or ""
-
-		range = {
-			start = { args.line1, 0 },
-			["end"] = { args.line2, #end_line },
-		}
-	end
-
-	require("conform").format {
-		async = true,
-		lsp_format = "fallback",
-		range = range,
-	}
-end, {
-	range = true,
-	desc = "Format buffer or selected range",
-})
-
--- ============================================================================
 -- Plugin specification
 -- ============================================================================
 
-vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 return {
 	{
 		"stevearc/conform.nvim",
 		event = { "BufWritePre" },
 		cmd = { "ConformInfo", "ConformFormat", "ConformToggleAutoFormat" },
+		init = function()
+			vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+
+			api.nvim_create_user_command("ConformToggleAutoFormat", function(args)
+				if args.bang then
+					vim.b.disable_autoformat = not vim.b.disable_autoformat
+				else
+					vim.g.disable_autoformat = not vim.g.disable_autoformat
+				end
+			end, { desc = "Conform toggle auto format", bang = true })
+		end,
+
+		config = function(_, opts)
+			require("conform").setup(opts)
+
+			api.nvim_create_user_command("ConformFormat", function(args)
+				local range
+				if args.range > 0 then
+					local end_line = api.nvim_buf_get_lines(0, args.line2 - 1, args.line2, true)[1] or ""
+					range = {
+						start = { args.line1, 0 },
+						["end"] = { args.line2, #end_line },
+					}
+				end
+				require("conform").format {
+					async = true,
+					lsp_format = "fallback",
+					range = range,
+				}
+			end, { range = true, desc = "Format buffer or selected range" })
+		end,
+
 		---@module "conform"
 		---@type conform.setupOpts
 		opts = {
@@ -146,6 +140,9 @@ return {
 
 				-- XML
 				xml = { "xmlformatter" },
+
+				-- kdl
+				kdl = { "kdlfmt" },
 
 				-- Go
 				go = {

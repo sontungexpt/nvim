@@ -107,7 +107,8 @@ o.listchars = "tab:  ,trail:·"
 --Clipboard
 o.clipboard = vim.env.SSH_CONNECTION and "" or "unnamedplus" -- Sync with system clipboard
 
---Split window
+--window
+o.winborder = "single"
 o.splitkeep = "screen"
 o.splitbelow = true
 o.splitright = true

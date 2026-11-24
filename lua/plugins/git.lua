@@ -4,7 +4,7 @@
 return {
 	{
 		"lewis6991/gitsigns.nvim",
-		event = "User GitLazyLoaded",
+		event = "User FirstGitReady",
 		opts = {
 			signs = {
 				add = { text = "+" },
@@ -22,12 +22,12 @@ return {
 			},
 			current_line_blame = true,
 			current_line_blame_formatter = "<author>, <author_time:%d-%m-%Y> - <summary>",
-			on_attach = require("core.keymaps").gitsigns,
+			on_attach = require("core.keymap").gitsigns,
 		},
 	},
 	{
 		"akinsho/git-conflict.nvim",
-		event = "User GitLazyLoaded",
+		event = "User FirstGitReady",
 		opts = function()
 			vim.api.nvim_create_autocmd("User", {
 				pattern = { "GitConflictDetected", "GitConflictResolved" },

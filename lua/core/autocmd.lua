@@ -18,56 +18,46 @@ autocmd({ "VimEnter", "VimLeave" }, {
 	desc = "Update remote plugins",
 })
 
-
 autocmd("BufWritePre", {
 	group = group,
 	desc = "Remove trailing whitespace and create parent directory if not exists",
 	callback = function(event)
-	    -- Trailing whitespace
-		api.nvim_buf_call(event.buf, function()
-			cmd([[silent! keeppatterns %s/\s\+$//e]])
-		end)
+		-- Trailing whitespace
+		api.nvim_buf_call(event.buf, function() cmd([[silent! keeppatterns %s/\s\+$//e]]) end)
 
 		-- Make parent directory if not exists
-		if event.match:match("^%w%w+:[\\/][\\/]") then
-			return
-		end
+		if event.match:match("^%w%w+:[\\/][\\/]") then return end
 		local file = vim.uv.fs_realpath(event.match) or event.match
 		vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
-  end,
+	end,
 })
-
 
 autocmd("BufEnter", {
 	group = group,
 	desc = "Do filetype specific work",
 	callback = function(args)
-	    local bufnr  = args.buf
+		local bufnr = args.buf
 
-	    -- delay a little to ensure the buffer and filetype are fully loaded before processing
+		-- delay a little to ensure the buffer and filetype are fully loaded before processing
 		vim.defer_fn(function()
-            if not api.nvim_buf_is_valid(bufnr) or not api.nvim_buf_is_loaded(bufnr) then
-				return
-			end
+			if not api.nvim_buf_is_valid(bufnr) or not api.nvim_buf_is_loaded(bufnr) then return end
 			local filetype = api.nvim_get_option_value("filetype", { buf = bufnr })
 
 			--- @type table<string, string|function>
-            local tasks = {
-                help = "wincmd L", -- Open help in vertical split
+			local tasks = {
+				help = "wincmd L", -- Open help in vertical split
 				qf = "setlocal nobuflisted", -- Don't show quickfix in buffer list
 				man = "setlocal nobuflisted",
 
 				-- Disable diagnostic for .env files
 				sh = function()
-                    if args.file:match("%.env$") then
-                        vim.diagnostic.enable(false, { bufnr = bufnr })
-                    end
+					if args.file:match("%.env$") then vim.diagnostic.enable(false, { bufnr = bufnr }) end
 				end,
 
 				-- Fix conceallevel for json files
 				json = "setlocal conceallevel=0",
-                jsonc = "setlocal conceallevel=0",
-                json5 = "setlocal conceallevel=0",
+				jsonc = "setlocal conceallevel=0",
+				json5 = "setlocal conceallevel=0",
 			}
 
 			local task = tasks[filetype]
@@ -92,17 +82,16 @@ autocmd({ "WinLeave", "WinEnter" }, {
 	end,
 })
 
-
 autocmd("TextYankPost", {
 	group = group,
 	desc = "Highlight yanked text",
-  callback = function()
-    if vim.fn.has("nvim-0.13") == 1 then
-      vim.hl.hl_op()
-    else
-      (vim.hl or vim.highlight).on_yank()
-    end
-  end,
+	callback = function()
+		if vim.fn.has("nvim-0.13") == 1 then
+			vim.hl.hl_op()
+		else
+			(vim.hl or vim.highlight).on_yank()
+		end
+	end,
 })
 
 autocmd("ModeChanged", {
@@ -158,10 +147,7 @@ autocmd({ "FocusGained", "TermResponse", "TermLeave" }, {
 	callback = function()
 		if vim.fn.mode() ~= "c" and not vim.fn.bufexists("[Command Line]") then
 			cmd("checktime")
-
-			if package.loaded["nvim-tree"] then
-				cmd("NvimTreeRefresh")
-			end
+			if package.loaded["nvim-tree"] then cmd("NvimTreeRefresh") end
 		end
 	end,
 })

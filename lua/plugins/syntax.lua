@@ -11,7 +11,7 @@ return {
 			"nvim-tree/nvim-web-devicons",
 		},
 		build = ":TSUpdate",
-		event = "User FileLazyLoaded",
+		event = "User FirstFileReady",
 		cmd = { "TSUpdate", "TSInstall", "TSInstallFromGrammar", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
 		opts = {
 			-- Single list of tree-sitter languages ensured to be installed
@@ -86,7 +86,7 @@ return {
 				for _, lang in ipairs(langs) do
 					if not installed[lang] then todo[#todo + 1] = lang end
 				end
-				if #todo == 0 then return end
+				if next(todo) == nil then return end
 
 				local notify = require("utils.notify")
 				ensure_ts_cli(function(ok)

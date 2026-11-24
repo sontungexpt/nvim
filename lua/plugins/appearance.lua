@@ -13,14 +13,10 @@ return {
 		},
 	},
 	{
-		-- "sontungexpt/witch",
-		dir = "/home/stilux/Data/workspace/neovim-plugins/witch",
+		"sontungexpt/witch",
+		-- dir = "/home/stilux/Data/workspace/neovim-plugins/witch",
 		priority = 1000,
 		lazy = false,
-		opts = {
-			dim = {
-				enabled = "advanced",
-			},
-		},
+		opts = {},
 	},
 }

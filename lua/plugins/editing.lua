@@ -3,41 +3,44 @@
 -- Mission: Improve the core editing experience (commenting code, indentation guides, color picker).
 return {
 	-- Support comment
+	-- {
+	-- 	"numToStr/Comment.nvim",
+	-- 	keys = {
+	-- 		{ "gcc", mode = "n", desc = "Toggle line comment" },
+	-- 		{ "gbc", mode = "n", desc = "Toggle block comment" },
+	-- 		{ "gc", mode = { "n", "o", "v" }, desc = "Comment motion" },
+	-- 		{ "gb", mode = { "n", "o", "v" }, desc = "Block comment motion" },
+	-- 	},
+	-- 	dependencies = {
+	-- 		{
+	-- 			"JoosepAlviste/nvim-ts-context-commentstring",
+	-- 			dependencies = { "nvim-treesitter/nvim-treesitter" },
+	-- 			opts = {
+	-- 				enable_autocmd = false,
+	-- 				config = {
+	-- 					lua = "-- %s",
+	-- 				},
+	-- 			},
+	-- 		},
+	-- 	},
+	-- 	opts = function()
+	-- 		return {
+	-- 			ignore = "^$",
+	-- 			pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
+	-- 		}
+	-- 	end,
+	-- },
+
 	{
-		"numToStr/Comment.nvim",
-		event = "User FileLazyLoaded",
-		dependencies = {
-			{
-				"JoosepAlviste/nvim-ts-context-commentstring",
-				dependencies = {
-					"nvim-treesitter/nvim-treesitter",
-				},
-				opts = {
-					enable_autocmd = false,
-				},
-			},
-		},
-		opts = {
-			ignore = "^$",
-			pre_hook = function(ctx)
-				local U = require("Comment.utils")
-				local location = nil
-				if ctx.ctype == U.ctype.line then
-					location = require("ts_context_commentstring.utils").get_cursor_location()
-				elseif ctx.cmotion == U.cmotion.v or ctx.cmotion == U.cmotion.V then
-					location = require("ts_context_commentstring.utils").get_virtual_location()
-				end
-				return require("ts_context_commentstring.internal").calculate_commentstring {
-					key = location or { cmotion = ctx.cmotion, ctype = ctx.ctype },
-				}
-			end,
-		},
+		"folke/ts-comments.nvim",
+		event = "User FirstKeyReady",
+		opts = {},
 	},
 
 	-- Auto indent
 	{
 		"lukas-reineke/indent-blankline.nvim",
-		event = "User FileLazyLoaded",
+		event = "User FirstFileReady",
 		main = "ibl",
 		dependencies = {
 			"HiPhish/rainbow-delimiters.nvim",
@@ -67,12 +70,20 @@ return {
 		opts = {},
 	},
 
-	-- Color hex highlighting: shows background color for color codes (#RRGGBB, rgb(), etc.)
 	{
-		"brenoprata10/nvim-highlight-colors",
-		event = "User FileLazyLoaded",
+		dir = "/home/stilux/Data/workspace/neovim-plugins/witch-colors",
+		-- "brenoprata10/nvim-highlight-colors",
+		-- event = "User FirstFileReady",
+		lazy = false,
 		opts = {},
 	},
+	-- Color hex highlighting: shows background color for color codes (#RRGGBB, rgb(), etc.)
+	-- {
+	-- 	dir = "/home/stilux/Data/workspace/neovim-plugins/nvim-highlight-colors",
+	-- 	-- "brenoprata10/nvim-highlight-colors",
+	-- 	event = "User FirstFileReady",
+	-- 	opts = {},
+	-- },
 
 	-- Flash: enhanced search and motion with labels (s, S, f, F, t, T, etc.)
 	-- {

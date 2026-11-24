@@ -5,258 +5,259 @@ local lsp, fn = vim.lsp, vim.fn
 -- Mission: LSP configuration, server management (mason), language-specific servers, and LSP keymaps.
 
 return {
-    {
-        "folke/lazydev.nvim",
-        ft = "lua",
-        cmd = "LazyDev",
-        opts = {
-            library = {
-                { path = "lazy.nvim" },
-                { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-            },
-        },
-    },
-    {
-        "neovim/nvim-lspconfig",
-        cmd = { "LspInfo" },
-        event = { "BufReadPre", "BufNewFile" },
-        opts = {
-            servers = {
-                -- Official JetBrains Kotlin LSP (currently Alpha).
-                { name = "kotlin_lsp" },
+	{
+		"folke/lazydev.nvim",
+		ft = "lua",
+		cmd = "LazyDev",
+		opts = {
+			library = {
+				{ path = "lazy.nvim" },
+				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+			},
+		},
+	},
+	{
+		"neovim/nvim-lspconfig",
+		cmd = { "LspInfo" },
+		event = { "BufReadPre", "BufNewFile" },
+		opts = {
+			servers = {
+				-- Official JetBrains Kotlin LSP (currently Alpha).
+				{ name = "kotlin_lsp" },
 
-                -- Python
-                { name = "basedpyright" },
-                {
-                    name = "ruff",
-                    config = {
-                        -- Let basedpyright handle hover/type information.
-                        on_attach = function(client) client.server_capabilities.hoverProvider = false end,
-                    },
-                },
+				-- Python
+				{ name = "basedpyright" },
+				{
+					name = "ruff",
+					config = {
+						-- Let basedpyright handle hover/type information.
+						on_attach = function(client) client.server_capabilities.hoverProvider = false end,
+					},
+				},
 
-                -- go
-                { name = "gopls" },
+				-- go
+				{ name = "gopls" },
 
-                -- bash
-                { name = "bashls" },
+				-- -- bash
+				-- { name = "bashls" },
 
-                -- cpp
-                { name = "clangd" },
+				{ name = "shuck" },
 
-                -- CMake
-                { name = "cmake" },
+				-- cpp
+				{ name = "clangd" },
 
-                -- Zig
-                { name = "zls" },
+				-- CMake
+				{ name = "cmake" },
 
-                -- Biome: JS / TS / JSON / CSS diagnostics and code actions.
-                { name = "biome" },
+				-- Zig
+				{ name = "zls" },
 
-                -- ESLint: project-specific JavaScript / TypeScript linting.
-                { name = "eslint" },
+				-- Biome: JS / TS / JSON / CSS diagnostics and code actions.
+				{ name = "biome" },
 
-                -- CSS
-                { name = "cssls" },
+				-- ESLint: project-specific JavaScript / TypeScript linting.
+				{ name = "eslint" },
 
-                -- HTML
-                { name = "html" },
+				-- CSS
+				{ name = "cssls" },
 
-                -- JSON
-                { name = "jsonls" },
+				-- HTML
+				{ name = "html" },
 
-                -- Vue 3
-                { name = "vue_ls" },
+				-- JSON
+				{ name = "jsonls" },
 
-                -- Tailwind CSS
-                { name = "tailwindcss" },
+				-- Vue 3
+				{ name = "vue_ls" },
 
-                -- Emmet
-                {
-                    name = "emmet_ls",
-                    config = {
-                        filetypes = {
-                            "html",
-                            "css",
-                            "sass",
-                            "scss",
-                            "less",
-                            "javascript",
-                            "typescript",
-                            "javascriptreact",
-                            "typescriptreact",
-                            "vue",
-                            "vue-html",
-                        },
-                    },
-                },
+				-- Tailwind CSS
+				{ name = "tailwindcss" },
 
-                -- TOML
-                { name = "tombi" },
+				-- Emmet
+				{
+					name = "emmet_ls",
+					config = {
+						filetypes = {
+							"html",
+							"css",
+							"sass",
+							"scss",
+							"less",
+							"javascript",
+							"typescript",
+							"javascriptreact",
+							"typescriptreact",
+							"vue",
+							"vue-html",
+						},
+					},
+				},
 
-                -- Markdown
-                { name = "marksman" },
+				-- TOML
+				{ name = "tombi" },
 
-                -- YAML
-                { name = "yamlls" },
+				-- Markdown
+				{ name = "marksman" },
 
-                -- XML
-                { name = "lemminx" },
+				-- YAML
+				{ name = "yamlls" },
 
-                -- lua
-                {
-                    name = "lua_ls",
-                    config = {
-                        settings = {
-                            Lua = {
-                                runtime = {
-                                    version = "LuaJIT",
-                                },
-                                diagnostics = {
-                                    globals = { "vim" },
-                                },
-                                telemetry = {
-                                    enable = false,
-                                },
-                                workspace = {
-                                    checkThirdParty = false,
-                                    ignoreDir = {
-                                        ".git",
-                                        "node_modules",
-                                        "dist",
-                                        "build",
-                                        vim.fn.stdpath("config").. "/refs"
-                                    },
-                                    --- Comment this if you use lazydev.nvim
-                                    -- library = {
-                                    --     [fn.expand("$VIMRUNTIME/lua")] = true,
-                                    --     [fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
-                                    --     [fn.stdpath("data") .. "/lazy/lazy.nvim/lua/lazy"] = true,
-                                    --     ["${3rd}/luv/library"] = true,
-                                    -- },
-                                    -- maxPreload = 1000,
-                                    -- preloadFileSize = 200,
+				-- XML
+				{ name = "lemminx" },
 
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        config = function(_, opts)
-            local core_lsp = require("core.lsp")
-            --- Diagnostic configuration
-            core_lsp.setup_diagnostics()
+				-- lua
+				{
+					name = "lua_ls",
+					config = {
+						settings = {
+							Lua = {
+								runtime = {
+									version = "LuaJIT",
+								},
+								diagnostics = {
+									globals = { "vim" },
+								},
+								telemetry = {
+									enable = false,
+								},
+								workspace = {
+									checkThirdParty = false,
+									ignoreDir = {
+										".git",
+										"node_modules",
+										"dist",
+										"build",
+										vim.fn.stdpath("config") .. "/refs",
+									},
+									--- Comment this if you use lazydev.nvim
+									-- library = {
+									--     [fn.expand("$VIMRUNTIME/lua")] = true,
+									--     [fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
+									--     [fn.stdpath("data") .. "/lazy/lazy.nvim/lua/lazy"] = true,
+									--     ["${3rd}/luv/library"] = true,
+									-- },
+									-- maxPreload = 1000,
+									-- preloadFileSize = 200,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		config = function(_, opts)
+			local core_lsp = require("core.lsp")
+			--- Diagnostic configuration
+			core_lsp.setup_diagnostics()
 
+			--- Base capabilities
+			local capabilities = core_lsp.make_default_capabilities()
+			--- Default config for all servers
+			lsp.config("*", {
+				capabilities = capabilities,
+				on_init = function(client)
+					if client:supports_method("textDocument/semanticTokens") then
+						client.server_capabilities.semanticTokensProvider = nil
+					end
+				end,
+			})
 
-            --- Base capabilities
-            local capabilities = core_lsp.make_default_capabilities()
-            --- Default config for all servers
-            lsp.config("*", {
-                capabilities = capabilities,
-                on_init = function(client)
-                    if client:supports_method("textDocument/semanticTokens") then
-                        client.server_capabilities.semanticTokensProvider = nil
-                    end
-                end,
-            })
+			--- Apply per-server overrides and enable servers
+			-- Neovim automatically merges server config with vim.lsp.config("*", ...)
+			-- so we only need to call vim.lsp.config() when there are per-server overrides.
+			for _, server in ipairs(opts.servers) do
+				if server.config then lsp.config(server.name, server.config) end
+				lsp.enable(server.name)
+			end
+		end,
+	},
+	{
+		"mfussenegger/nvim-jdtls",
+		ft = "java",
+	},
+	{
+		"mrcjkb/rustaceanvim",
+		-- To avoid being surprised by breaking changes,
+		-- I recommend you set a version range
+		version = "^9",
+		-- This plugin implements proper lazy-loading (see :h lua-plugin-lazy).
+		-- No need for lazy.nvim to lazy-load it.
+		lazy = false,
+	},
+	{
+		dir = "/home/stilux/Data/workspace/neovim-plugins/mason-scout",
+		lazy = false,
+		cmd = {
+			"MasonScout",
+		},
+		opts = {},
+	},
+	{
+		"mason-org/mason.nvim",
+		build = ":MasonUpdate",
+		cmd = { "Mason", "MasonLog", "MasonUpdate", "MasonInstall", "MasonUninstall", "MasonUninstallAll" },
+		main = "mason",
+		opts = {
+			ensure_installed = { "stylua", "shfmt" },
+			ui = {
+				border = "single",
+				icons = {
+					package_pending = " ",
+					package_installed = " ",
+					package_uninstalled = " ",
+				},
+			},
+		},
+		config = function(_, opts)
+			require("mason").setup(opts)
+			local mr = require("mason-registry")
+			mr:on("package:install:success", function()
+				vim.defer_fn(
+					function()
+						require("lazy.core.handler.event").trigger {
+							event = "FileType",
+							buf = vim.api.nvim_get_current_buf(),
+						}
+					end,
+					100
+				)
+			end)
+		end,
+	},
 
-            --- Apply per-server overrides and enable servers
-            -- Neovim automatically merges server config with vim.lsp.config("*", ...)
-            -- so we only need to call vim.lsp.config() when there are per-server overrides.
-            for _, server in ipairs(opts.servers) do
-                if server.config then lsp.config(server.name, server.config) end
-                lsp.enable(server.name)
-            end
-        end,
-    },
-    {
-        "mfussenegger/nvim-jdtls",
-        ft = "java",
-    },
-    {
-        "mrcjkb/rustaceanvim",
-        -- To avoid being surprised by breaking changes,
-        -- I recommend you set a version range
-        version = "^9",
-        -- This plugin implements proper lazy-loading (see :h lua-plugin-lazy).
-        -- No need for lazy.nvim to lazy-load it.
-        lazy = false,
-    },
-    {
-        "mason-org/mason.nvim",
-        build = ":MasonUpdate",
-        cmd = { "Mason", "MasonLog", "MasonUpdate", "MasonInstall", "MasonUninstall", "MasonUninstallAll" },
-        main = "mason",
-        opts = {
-            ensure_installed = { "stylua", "shfmt" },
-            ui = {
-                border = "single",
-                icons = {
-                    package_pending = " ",
-                    package_installed = " ",
-                    package_uninstalled = " ",
-                },
-            },
-        },
-        config = function(_, opts)
-            require("mason").setup(opts)
-            local mr = require("mason-registry")
-            mr:on("package:install:success", function()
-                vim.defer_fn(
-                    function()
-                        require("lazy.core.handler.event").trigger {
-                            event = "FileType",
-                            buf = vim.api.nvim_get_current_buf(),
-                        }
-                    end,
-                    100
-                )
-            end)
-        end,
-    },
-    {
-        dir = "/home/stilux/Data/workspace/neovim-plugins/mason-scout",
-        lazy = false,
-        cmd = {
-            "MasonScout",
-        },
-        opts = {}, -- see Configuration section
-    },
-    -- {
-    --   "Saecki/crates.nvim",
-    --   ft = { "toml" },
-    --   config = function()
-    --     require("crates").setup({
-    --       lsp = {
-    --         enabled = true,
-    --         actions = true,
-    --         completion = true,
-    --         hover = true,
-    --       },
-    --       popup = {
-    --         autofocus = false,
-    --       },
-    --     })
-    --   end,
-    -- },
-    -- {
-    --   "akinsho/flutter-tools.nvim",
-    --   ft = "dart",
-    --   event = "BufReadPost */pubspec.yaml",
-    --   dependencies = {
-    --     "nvim-lua/plenary.nvim",
-    --     "stevearc/dressing.nvim",
-    --   },
-    --   main = "flutter-tools",
-    --   opts = {
-    --     ui = {
-    --       border = "single",
-    --     },
-    --     lsp = {
-    --       on_attach = function(client, bufnr) end,
-    --     },
-    --   },
-    -- },
+	-- {
+	--   "Saecki/crates.nvim",
+	--   ft = { "toml" },
+	--   config = function()
+	--     require("crates").setup({
+	--       lsp = {
+	--         enabled = true,
+	--         actions = true,
+	--         completion = true,
+	--         hover = true,
+	--       },
+	--       popup = {
+	--         autofocus = false,
+	--       },
+	--     })
+	--   end,
+	-- },
+	-- {
+	--   "akinsho/flutter-tools.nvim",
+	--   ft = "dart",
+	--   event = "BufReadPost */pubspec.yaml",
+	--   dependencies = {
+	--     "nvim-lua/plenary.nvim",
+	--     "stevearc/dressing.nvim",
+	--   },
+	--   main = "flutter-tools",
+	--   opts = {
+	--     ui = {
+	--       border = "single",
+	--     },
+	--     lsp = {
+	--       on_attach = function(client, bufnr) end,
+	--     },
+	--   },
+	-- },
 }

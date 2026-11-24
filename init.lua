@@ -4,5 +4,5 @@ local require = require
 require("core.option")
 require("core.environment")
 require("core.autocmd")
-require("core.keymaps").setup()
+require("core.keymap").setup()
 require("core.bootstrap").boot()
