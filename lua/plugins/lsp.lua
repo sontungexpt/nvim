@@ -1,5 +1,5 @@
 local vim = vim
-local lsp, fn = vim.lsp, vim.fn
+local lsp = vim.lsp
 -- ---------------------------------------------------- LSP ----------------------------------------------------
 -- Language Server Protocol plugins.
 -- Mission: LSP configuration, server management (mason), language-specific servers, and LSP keymaps.
@@ -13,9 +13,11 @@ return {
 			library = {
 				{ path = "lazy.nvim" },
 				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+				{ path = "nvim-lspconfig", words = { "lspconfig" } },
 			},
 		},
 	},
+
 	{
 		"neovim/nvim-lspconfig",
 		cmd = { "LspInfo" },
@@ -23,123 +25,131 @@ return {
 		opts = {
 			servers = {
 				-- Official JetBrains Kotlin LSP (currently Alpha).
-				{ name = "kotlin_lsp" },
+				kotlin_lsp = {},
 
 				-- Python
-				{ name = "basedpyright" },
-				{
-					name = "ruff",
-					config = {
-						-- Let basedpyright handle hover/type information.
-						on_attach = function(client) client.server_capabilities.hoverProvider = false end,
-					},
+				basedpyright = {},
+				ruff = {
+					-- Let basedpyright handle hover/type information.
+					on_attach = function(client) client.server_capabilities.hoverProvider = false end,
 				},
 
-				-- go
-				{ name = "gopls" },
+				-- Go
+				gopls = {},
 
-				-- bash | sh
-				-- { name = "bashls" },
+				-- Bash | sh
+				-- bashls = {},
 
-				-- zsh | sh | bash
-				{ name = "shuck" },
+				-- Zsh | sh | bash
+				shuck = {},
 
-				-- cpp
-				{ name = "clangd" },
+				-- C++
+				clangd = {},
 
 				-- CMake
-				{ name = "cmake" },
+				cmake = {},
 
 				-- Zig
-				{ name = "zls" },
+				zls = {},
 
 				-- Biome: JS / TS / JSON / CSS diagnostics and code actions.
-				{ name = "biome" },
+				biome = {},
 
 				-- ESLint: project-specific JavaScript / TypeScript linting.
-				{ name = "eslint" },
+				eslint = {},
 
 				-- CSS
-				{ name = "cssls" },
+				cssls = {},
 
 				-- HTML
-				{ name = "html" },
+				html = {},
 
 				-- JSON
-				{ name = "jsonls" },
+				jsonls = {},
 
 				-- Vue 3
-				{ name = "vue_ls" },
+				vue_ls = {},
 
 				-- Tailwind CSS
-				{ name = "tailwindcss" },
+				tailwindcss = {},
 
 				-- Emmet
-				{
-					name = "emmet_ls",
-					config = {
-						filetypes = {
-							"html",
-							"css",
-							"sass",
-							"scss",
-							"less",
-							"javascript",
-							"typescript",
-							"javascriptreact",
-							"typescriptreact",
-							"vue",
-							"vue-html",
-						},
+				emmet_ls = {
+					filetypes = {
+						"html",
+						"css",
+						"sass",
+						"scss",
+						"less",
+						"javascript",
+						"typescript",
+						"javascriptreact",
+						"typescriptreact",
+						"vue",
+						"vue-html",
 					},
 				},
 
 				-- TOML
-				{ name = "tombi" },
+				tombi = {},
 
 				-- Markdown
-				{ name = "marksman" },
+				marksman = {},
 
 				-- YAML
-				{ name = "yamlls" },
+				yamlls = {},
 
 				-- XML
-				{ name = "lemminx" },
+				lemminx = {},
 
-				-- lua
-				{
-					name = "lua_ls",
-					config = {
-						settings = {
-							Lua = {
-								runtime = {
-									version = "LuaJIT",
+				-- Lua
+				lua_ls = {
+					settings = {
+						Lua = {
+							runtime = {
+								version = "LuaJIT",
+							},
+							diagnostics = {
+								globals = { "vim" },
+							},
+							telemetry = {
+								enable = false,
+							},
+							codeLens = {
+								enable = true,
+							},
+							completion = {
+								callSnippet = "Replace",
+							},
+							doc = {
+								privateName = { "^_" },
+							},
+							hint = {
+								enable = true,
+								setType = false,
+								paramType = true,
+								paramName = "Disable",
+								semicolon = "Disable",
+								arrayIndex = "Disable",
+							},
+							workspace = {
+								checkThirdParty = false,
+								ignoreDir = {
+									".git",
+									"node_modules",
+									"dist",
+									"build",
+									vim.fn.stdpath("config") .. "/refs",
 								},
-								diagnostics = {
-									globals = { "vim" },
-								},
-								telemetry = {
-									enable = false,
-								},
-								workspace = {
-									checkThirdParty = false,
-									ignoreDir = {
-										".git",
-										"node_modules",
-										"dist",
-										"build",
-										vim.fn.stdpath("config") .. "/refs",
-									},
-									--- Comment this if you use lazydev.nvim
-									-- library = {
-									--     [fn.expand("$VIMRUNTIME/lua")] = true,
-									--     [fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
-									--     [fn.stdpath("data") .. "/lazy/lazy.nvim/lua/lazy"] = true,
-									--     ["${3rd}/luv/library"] = true,
-									-- },
-									-- maxPreload = 1000,
-									-- preloadFileSize = 200,
-								},
+								--- Comment this if you use lazydev.nvim
+								-- library = {
+								--     [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+								--     [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
+								--     [vim.fn.stdpath("data") .. "/lazy/lazy.nvim/lua/lazy"] = true,
+								--     ["${3rd}/luv/library"] = true,
+								-- },
+								-- maxPreload = 1000,
+								-- preloadFileSize = 200,
 							},
 						},
 					},
@@ -148,11 +158,13 @@ return {
 		},
 		config = function(_, opts)
 			local core_lsp = require("core.lsp")
+
 			--- Diagnostic configuration
 			core_lsp.setup_diagnostics()
 
 			--- Base capabilities
 			local capabilities = core_lsp.make_default_capabilities()
+
 			--- Default config for all servers
 			lsp.config("*", {
 				capabilities = capabilities,
@@ -166,16 +178,21 @@ return {
 			--- Apply per-server overrides and enable servers
 			-- Neovim automatically merges server config with vim.lsp.config("*", ...)
 			-- so we only need to call vim.lsp.config() when there are per-server overrides.
-			for _, server in ipairs(opts.servers) do
-				if server.config then lsp.config(server.name, server.config) end
-				lsp.enable(server.name)
+			for name, server_opts in pairs(opts.servers) do
+				if server_opts ~= false then
+					if type(server_opts) == "table" then lsp.config(name, server_opts) end
+
+					lsp.enable(name)
+				end
 			end
 		end,
 	},
+
 	{
 		"mfussenegger/nvim-jdtls",
 		ft = "java",
 	},
+
 	{
 		"mrcjkb/rustaceanvim",
 		-- To avoid being surprised by breaking changes,
@@ -185,12 +202,11 @@ return {
 		-- No need for lazy.nvim to lazy-load it.
 		lazy = false,
 	},
+
 	{
 		dir = "/home/stilux/Data/workspace/neovim-plugins/mason-scout",
 		lazy = false,
-		cmd = {
-			"MasonScout",
-		},
+		cmd = "MasonScout",
 		opts = {},
 	},
 	{
