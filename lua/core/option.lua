@@ -44,14 +44,13 @@ o.foldcolumn = "0"
 o.foldlevel = 99
 o.foldlevelstart = 99
 opt.fillchars = {
-  foldopen = "",
-  foldclose = "",
-  fold = " ",
-  foldsep = " ",
-  diff = "╱",
-  eob = " ",
+	foldopen = "",
+	foldclose = "",
+	fold = " ",
+	foldsep = " ",
+	diff = "╱",
+	eob = " ",
 }
-
 
 -- Text width and wrap
 o.wrap = false

@@ -141,8 +141,8 @@ return {
 				-- XML
 				xml = { "xmlformatter" },
 
-				-- kdl
-				kdl = { "kdlfmt" },
+				-- -- kdl
+				-- kdl = { "kdlfmt" },
 
 				-- Go
 				go = {
@@ -173,6 +173,7 @@ return {
 
 				-- HTML / Documentation / Configuration
 				html = MARKUP_CONFIG_FORMATTERS,
+				-- markdown = MARKUP_CONFIG_FORMATTERS,
 				markdown = MARKUP_CONFIG_FORMATTERS,
 				yaml = MARKUP_CONFIG_FORMATTERS,
 				toml = MARKUP_CONFIG_FORMATTERS,
