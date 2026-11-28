@@ -6,10 +6,6 @@ local vim = vim
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		dependencies = {
-			"HiPhish/rainbow-delimiters.nvim",
-			"nvim-tree/nvim-web-devicons",
-		},
 		build = ":TSUpdate",
 		event = "User FirstFileReady",
 		cmd = { "TSUpdate", "TSInstall", "TSInstallFromGrammar", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
